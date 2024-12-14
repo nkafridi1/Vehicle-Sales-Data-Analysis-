@@ -46,3 +46,8 @@ CREATE TABLE PriceLog (
     update_date TIMESTAMP,
     FOREIGN KEY (vin) REFERENCES Vehicles(vin)
 );
+
+
+CREATE INDEX idx_vin ON Sales(vin);
+CREATE INDEX idx_make_model ON Vehicles(make, model);
+CREATE INDEX idx_saledate ON Sales(saledate);
