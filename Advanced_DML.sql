@@ -43,3 +43,39 @@ FROM (
     GROUP BY s.state, v.make, v.model
 ) ranked_sales
 WHERE rank <= 5 and state = 'mi';
+
+-- Finding States with Total Revenue Greater Than the National Average
+SELECT state, SUM(sellingprice) AS total_revenue
+FROM Sales
+GROUP BY state
+HAVING SUM(sellingprice) > (
+    SELECT AVG(total_revenue)
+    FROM (
+        SELECT state, SUM(sellingprice) AS total_revenue
+        FROM Sales
+        GROUP BY state
+    ) state_revenues
+);
+
+-- Identify Vehicles with Significant Price Deviations from MMR
+SELECT 
+    v.make, 
+    v.model, 
+    mt.mmr AS market_value, 
+    s.sellingprice AS actual_price, 
+    ROUND(((s.sellingprice - mt.mmr) / mt.mmr) * 100, 2) AS price_deviation_percentage,
+    CASE 
+        WHEN s.sellingprice > mt.mmr * 1.2 THEN 'Overpriced'
+        WHEN s.sellingprice < mt.mmr * 0.8 THEN 'Underpriced'
+        ELSE 'Fairly Priced'
+    END AS price_category
+FROM 
+    Vehicles v
+JOIN 
+    Sales s ON v.vin = s.vin
+JOIN 
+    MarketTrends mt ON v.vin = mt.vin
+WHERE 
+    ABS(s.sellingprice - mt.mmr) >= (mt.mmr * 0.2) and model != 'NaN' and make != 'NaN'
+ORDER BY 
+    price_deviation_percentage DESC;
