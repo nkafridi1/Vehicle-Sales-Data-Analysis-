@@ -7,7 +7,6 @@ This project develops a database system to analyze the "Vehicle Sales and Market
 - Market trend analysis
 - Sales pattern forecasting
 - Performance metrics tracking
-- Predictive modeling capabilities
 
 ## Dataset
 The dataset includes:
@@ -23,7 +22,6 @@ This project employs:
 - Advanced query optimization techniques
 - Efficient data retrieval mechanisms
 - Robust data integrity controls
-- Scalable storage solutions
 
 ## Database Schema
 The database contains the following tables:
@@ -33,65 +31,6 @@ The database contains the following tables:
 - **Condition**: Condition ratings and odometer readings.
 - **PriceLog**: Logs for price updates.
 
-### Example Schema
-```sql
-CREATE TABLE Vehicles (
-  vin VARCHAR(20) PRIMARY KEY,
-  year INT,
-  make VARCHAR(50),
-  model VARCHAR(50),
-  trim VARCHAR(50),
-  body VARCHAR(50),
-  transmission VARCHAR(50),
-  color VARCHAR(30),
-  interior VARCHAR(30)
-);
-
-CREATE TABLE Sales (
-  id SERIAL PRIMARY KEY,
-  vin VARCHAR(20),
-  state VARCHAR(20),
-  saledate TIMESTAMP,
-  sellingprice DECIMAL(10, 2),
-  FOREIGN KEY (vin) REFERENCES Vehicles(vin)
-);
-```
-
-## Data Transformation
-The raw dataset required cleaning to remove discrepancies:
-- Eliminated NULL and invalid dates.
-- Filtered unrealistic selling prices (e.g., below $500).
-- Removed records with NULL values in critical fields (e.g., make and model).
-
-## SQL Queries
-### Total Sales by Manufacturer
-```sql
-SELECT make, COUNT(*) AS total_sales, SUM(sellingprice) AS total_revenue
-FROM Vehicles v
-JOIN Sales s ON v.vin = s.vin
-GROUP BY make;
-```
-
-### Top 10 Car Manufacturers by Sales
-```sql
-SELECT make, COUNT(*) AS total_sales, SUM(sellingprice) AS total_revenue
-FROM Vehicles v
-JOIN Sales s ON v.vin = s.vin
-GROUP BY make
-ORDER BY total_revenue DESC
-LIMIT 10;
-```
-
-### Vehicles with the Best Condition-to-Price Ratio
-```sql
-SELECT v.make, v.model, c.condition_rating, s.sellingprice,
-  (c.condition_rating / s.sellingprice) AS condition_price_ratio
-FROM Vehicles v
-JOIN Sales s ON v.vin = s.vin
-JOIN Condition c ON v.vin = c.vin
-ORDER BY condition_price_ratio DESC
-LIMIT 10;
-```
 
 ## Team Responsibilities
 - **Muhammad Danish Asim**: Data cleaning and DDL/DML statements.
@@ -116,21 +55,7 @@ The project applies indexing and query optimization techniques to enhance perfor
 - Identifying overpriced and underpriced vehicles
 - State-wise sales analysis
 
-## Transaction Management
-Example:
-```sql
-START TRANSACTION;
-UPDATE Sales SET sellingprice = sellingprice * 1.05
-WHERE vin = '5xyktca69fg566472';
-INSERT INTO PriceLog (vin, updated_price, update_date)
-VALUES ('5xyktca69fg566472', 22575, NOW());
-COMMIT;
-```
-
-## License
-This project is licensed under the [MIT License](LICENSE).
-
 ## Contributors
-- Muhammad Danish Asim
+- Muhammad Danish Asim 
 - Saad Shahrukh Kiyani
 - Naveed Khan Afridi
