@@ -1,117 +1,136 @@
 # Vehicle Sales Data Analysis
 
-This project is designed to analyze vehicle sales data using SQL for data querying and Python for data processing, visualization, and generating insights. The analysis focuses on trends, patterns, and key metrics to inform decision-making in the automotive sales industry.
-
-## Table of Contents
-- [Project Overview](#project-overview)
-- [Features](#features)
-- [Technologies Used](#technologies-used)
-- [Setup and Installation](#setup-and-installation)
-- [Usage](#usage)
-- [Project Structure](#project-structure)
-- [Key Insights](#key-insights)
-- [Contributing](#contributing)
-- [License](#license)
-
 ## Project Overview
-The **Vehicle Sales Data Analysis** project integrates SQL and Python to analyze a large dataset of vehicle sales. The project includes tasks such as:
-- Data cleaning and transformation.
-- Querying and aggregating sales data.
-- Visualizing sales trends.
-- Identifying top-performing vehicles and regions.
-- Predictive modeling for future sales performance.
+This project develops a database system to analyze the "Vehicle Sales and Market Trends Dataset." The system extracts insights and trends about car sales based on parameters like manufacturing year, location, and vehicle condition. This project integrates database theory and SQL to derive actionable insights and enhance decision-making in the vehicle sales sector.
 
-## Features
-- **SQL Integration**: Use SQL queries to extract and manipulate data from a relational database.
-- **Python Analytics**: Perform advanced analysis and generate visualizations using Python libraries like Pandas and Matplotlib.
-- **Data Insights**: Identify key metrics such as total sales, regional performance, and top-selling vehicles.
-- **Scalable Design**: Easily extendable to include additional datasets or more complex analyses.
+## Key Features
+- Market trend analysis
+- Sales pattern forecasting
+- Performance metrics tracking
+- Predictive modeling capabilities
 
-## Technologies Used
-- **SQL**: Data extraction, transformation, and querying.
-- **Python**:
-  - Libraries: Pandas, NumPy, Matplotlib, Seaborn, Scikit-learn.
-  - Scripting and data visualization.
-- **Database**: MySQL/PostgreSQL (configurable for other RDBMS).
-- **Tools**: Jupyter Notebook for interactive analysis.
+## Dataset
+The dataset includes:
+1. **Vehicle Details**: 974 models from 97 manufacturers (1982-2015).
+2. **Condition and Mileage**: Vehicle condition ratings (1-49) and odometer readings.
+3. **Transaction Information**: Sales prices ($500 to $230,000) and sale dates (01/01/2014 - 21/07/2015).
+4. **Market Trends**: Market values (Manheim Market Report) ranging from $25 to $182,000.
 
-## Setup and Installation
+Dataset source: [Kaggle](https://www.kaggle.com/datasets/syedanwarafridi/vehicle-sales-data)
 
-### Prerequisites
-- Python 3.8+
-- SQL Database (e.g., MySQL or PostgreSQL)
-- Required Python libraries (listed in `requirements.txt`)
+## Technical Implementation
+This project employs:
+- Advanced query optimization techniques
+- Efficient data retrieval mechanisms
+- Robust data integrity controls
+- Scalable storage solutions
 
-### Installation Steps
-1. Clone the repository:
-    ```bash
-    git clone https://github.com/your-username/Vehicle-Sales-Data-Analysis.git
-    cd Vehicle-Sales-Data-Analysis
-    ```
-2. Set up the virtual environment and install dependencies:
-    ```bash
-    python3 -m venv venv
-    source venv/bin/activate # On Windows: venv\Scripts\activate
-    pip install -r requirements.txt
-    ```
-3. Configure the database connection in the `config.ini` file.
+## Database Schema
+The database contains the following tables:
+- **Vehicles**: Information about each vehicle (VIN, year, make, model, etc.).
+- **Sales**: Sales data (state, sale date, selling price, etc.).
+- **MarketTrends**: Market value (MMR) for vehicles.
+- **Condition**: Condition ratings and odometer readings.
+- **PriceLog**: Logs for price updates.
 
-4. Run the project:
-    ```bash
-    python main.py
-    ```
+### Example Schema
+```sql
+CREATE TABLE Vehicles (
+  vin VARCHAR(20) PRIMARY KEY,
+  year INT,
+  make VARCHAR(50),
+  model VARCHAR(50),
+  trim VARCHAR(50),
+  body VARCHAR(50),
+  transmission VARCHAR(50),
+  color VARCHAR(30),
+  interior VARCHAR(30)
+);
 
-## Usage
-
-1. **Load Data**: Populate your SQL database with vehicle sales data.
-2. **Run Queries**: Use pre-defined SQL scripts in the `sql_scripts` folder to query the database.
-3. **Analyze Data**: Run Python scripts in the `analysis` folder to perform data analysis and visualization.
-
-### Example
-- Query total vehicle sales:
-    ```sql
-    SELECT SUM(sales_amount) AS total_sales FROM vehicle_sales;
-    ```
-- Visualize sales trends in Python:
-    ```python
-    import pandas as pd
-    import matplotlib.pyplot as plt
-
-    # Load data
-    sales_data = pd.read_csv('sales_data.csv')
-
-    # Plot trends
-    sales_data.groupby('month')['sales'].sum().plot(kind='line')
-    plt.title('Monthly Sales Trends')
-    plt.show()
-    ```
-
-## Project Structure
-```
-Vehicle-Sales-Data-Analysis/
-|-- data/                  # Raw and processed data
-|-- sql_scripts/           # SQL queries for data extraction
-|-- analysis/              # Python scripts for data analysis
-|-- notebooks/             # Jupyter notebooks for exploratory analysis
-|-- config.ini             # Database configuration file
-|-- main.py                # Entry point of the project
-|-- requirements.txt       # Python dependencies
-|-- README.md              # Project documentation
+CREATE TABLE Sales (
+  id SERIAL PRIMARY KEY,
+  vin VARCHAR(20),
+  state VARCHAR(20),
+  saledate TIMESTAMP,
+  sellingprice DECIMAL(10, 2),
+  FOREIGN KEY (vin) REFERENCES Vehicles(vin)
+);
 ```
 
-## Key Insights
-- **Top-Selling Regions**: Regions with the highest sales performance.
-- **Best-Selling Models**: Identification of vehicles driving sales growth.
-- **Seasonal Trends**: Analysis of seasonal demand fluctuations.
+## Data Transformation
+The raw dataset required cleaning to remove discrepancies:
+- Eliminated NULL and invalid dates.
+- Filtered unrealistic selling prices (e.g., below $500).
+- Removed records with NULL values in critical fields (e.g., make and model).
 
-## Contributing
-Contributions are welcome! To contribute:
-1. Fork the repository.
-2. Create a new feature branch:
-    ```bash
-    git checkout -b feature-name
-    ```
-3. Commit your changes and submit a pull request.
+## SQL Queries
+### Total Sales by Manufacturer
+```sql
+SELECT make, COUNT(*) AS total_sales, SUM(sellingprice) AS total_revenue
+FROM Vehicles v
+JOIN Sales s ON v.vin = s.vin
+GROUP BY make;
+```
+
+### Top 10 Car Manufacturers by Sales
+```sql
+SELECT make, COUNT(*) AS total_sales, SUM(sellingprice) AS total_revenue
+FROM Vehicles v
+JOIN Sales s ON v.vin = s.vin
+GROUP BY make
+ORDER BY total_revenue DESC
+LIMIT 10;
+```
+
+### Vehicles with the Best Condition-to-Price Ratio
+```sql
+SELECT v.make, v.model, c.condition_rating, s.sellingprice,
+  (c.condition_rating / s.sellingprice) AS condition_price_ratio
+FROM Vehicles v
+JOIN Sales s ON v.vin = s.vin
+JOIN Condition c ON v.vin = c.vin
+ORDER BY condition_price_ratio DESC
+LIMIT 10;
+```
+
+## Team Responsibilities
+- **Muhammad Danish Asim**: Data cleaning and DDL/DML statements.
+- **Saad Shahrukh Kiyani**: SQL queries and report writing.
+- **Naveed Khan Afridi**: ER diagrams and performance profiling.
+
+## Files
+- `hello.py`: Data transformation and cleaning script.
+- `ddl_schema.sql`: Database schema creation.
+- `ddl_indexes.sql`: Indexes for optimization.
+- `dml.sql`: Data insertion statements.
+- `hello.sql`: SQL queries for analysis.
+- Transformed dataset: CSV format.
+
+## Execution Plan and Optimization
+The project applies indexing and query optimization techniques to enhance performance.
+- **Before Optimization**: Long query execution times.
+- **After Optimization**: Improved efficiency using indexes on columns like `vin`, `make`, and `saledate`.
+
+## Advanced Analysis
+- Sales trends over time
+- Identifying overpriced and underpriced vehicles
+- State-wise sales analysis
+
+## Transaction Management
+Example:
+```sql
+START TRANSACTION;
+UPDATE Sales SET sellingprice = sellingprice * 1.05
+WHERE vin = '5xyktca69fg566472';
+INSERT INTO PriceLog (vin, updated_price, update_date)
+VALUES ('5xyktca69fg566472', 22575, NOW());
+COMMIT;
+```
 
 ## License
-This project is licensed under the MIT License. See the `LICENSE` file for details.
+This project is licensed under the [MIT License](LICENSE).
+
+## Contributors
+- Muhammad Danish Asim
+- Saad Shahrukh Kiyani
+- Naveed Khan Afridi
