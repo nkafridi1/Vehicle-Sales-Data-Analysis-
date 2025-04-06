@@ -57,5 +57,5 @@ The project applies indexing and query optimization techniques to enhance perfor
 
 ## Contributors
 - Muhammad Danish Asim 
-- Saad Shahrukh Kiyani
 - Naveed Khan Afridi
+- Saad Shahrukh Kiyani
